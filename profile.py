@@ -37,7 +37,7 @@ fpga = request.RawPC("fpga")
 # UMass cluster
 fpga.component_manager_id = "urn:publicid:IDN+cloudlab.umass.edu+authority+cm"
 # Assign to the fgpa node
-#fpga.component_id = "fpga-pc163"
+fpga.component_id = "fpga-pc163"
 # Use the default image for the type of the node selected. 
 fpga.setUseTypeDefaultImage()
 
