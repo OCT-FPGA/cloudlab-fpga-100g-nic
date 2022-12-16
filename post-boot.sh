@@ -182,32 +182,33 @@ FACTORY_SHELL="xilinx_u280_GOLDEN_8"
 NIC_PACKAGE="MLNX_OFED_LINUX-5.8-1.0.1.1-ubuntu18.04-x86_64"
 
 if [ ! -f ~/boot_flag ]; then
-    install_nic_driver
-    detect_cards
-    install_xrt
-    install_shellpkg
-    verify_install
+    echo "Install NIC driver"
+    #install_nic_driver
+    #detect_cards
+    #install_xrt
+    #install_shellpkg
+    #verify_install
     
-    if [ $? == 0 ] ; then
-        echo "XRT and shell package installation successful."
-        flash_card
-    else
-        echo "XRT and/or shell package installation failed."
-        exit 1
-    fi
+    #if [ $? == 0 ] ; then
+    #    echo "XRT and shell package installation successful."
+    #    flash_card
+    #else
+    #    echo "XRT and/or shell package installation failed."
+    #    exit 1
+    #fi
     
-    if check_factory_shell ; then
-        echo "Shell is in factory reset state. Cold reboot required."   
-        $SCRIPT_PATH/cold-boot-init.sh &
-    elif check_requested_shell ; then
-        echo "Shell is already up to date. Cold reboot not required."
-        touch ~/boot_flag
-    else
-        echo "FPGA shell could not be verified."
-        exit 1
-    fi
-    echo "Done running startup script."
-    exit 0
+    #if check_factory_shell ; then
+    #    echo "Shell is in factory reset state. Cold reboot required."   
+    #    $SCRIPT_PATH/cold-boot-init.sh &
+    #elif check_requested_shell ; then
+    #    echo "Shell is already up to date. Cold reboot not required."
+    #    touch ~/boot_flag
+    #else
+    #    echo "FPGA shell could not be verified."
+    #    exit 1
+    #fi
+    #echo "Done running startup script."
+    #exit 0
 else
     echo "Rebooted the node."
     #This is only supposed to update the SC since the shell is already updated.
