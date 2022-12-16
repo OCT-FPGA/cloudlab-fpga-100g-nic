@@ -4,16 +4,6 @@
 #
 #!/usr/bin/env bash
 
-install_nic_driver() {
-    echo "Download 100G Mellanox NIC driver"
-    wget -cO - "https://content.mellanox.com/ofed/MLNX_OFED-5.8-1.0.1.1/${NIC_PACKAGE}.tgz" > /tmp/${NIC_PACKAGE}.tgz
-    echo "Untar the NIC package. "
-    tar xzvf /tmp/${NIC_PACKAGE}.tgz -C /tmp/
-    rm /tmp/${NIC_PACKAGE}.tgz
-    sudo /tmp/${NIC_PACKAGE}/mlnxofedinstall -q #--without-fw-update
-    sudo ifconfig enp175s0np0 up
-}
-
 install_xrt() {
     echo "Download XRT installation package"
     wget -cO - "https://www.xilinx.com/bin/public/openDownload?filename=$XRT_PACKAGE" > /tmp/$XRT_PACKAGE
@@ -168,7 +158,7 @@ OSVERSION=`echo $OSVERSION | tr -d '"'`
 VERSION_ID=`grep '^VERSION_ID=' /etc/os-release | awk -F= '{print $2}'`
 VERSION_ID=`echo $VERSION_ID | tr -d '"'`
 OSVERSION="$OSVERSION-$VERSION_ID"
-TOOLVERSION="2021.1"
+TOOLVERSION=$1
 SCRIPT_PATH=/local/repository
 COMB="${TOOLVERSION}_${OSVERSION}"
 XRT_PACKAGE=`grep ^$COMB: $SCRIPT_PATH/spec.txt | awk -F':' '{print $2}' | awk -F';' '{print $1}' | awk -F= '{print $2}'`
@@ -179,36 +169,32 @@ PACKAGE_VERSION=`grep ^$COMB: $SCRIPT_PATH/spec.txt | awk -F':' '{print $2}' | a
 XRT_VERSION=`grep ^$COMB: $SCRIPT_PATH/spec.txt | awk -F':' '{print $2}' | awk -F';' '{print $7}' | awk -F= '{print $2}'`
 FACTORY_SHELL="xilinx_u280_GOLDEN_8"
 
-NIC_PACKAGE="MLNX_OFED_LINUX-5.8-1.0.1.1-ubuntu18.04-x86_64"
-
 if [ ! -f ~/boot_flag ]; then
-    echo "Install NIC driver"
-    #install_nic_driver
-    #detect_cards
-    #install_xrt
-    #install_shellpkg
-    #verify_install
+    detect_cards
+    install_xrt
+    install_shellpkg
+    verify_install
     
-    #if [ $? == 0 ] ; then
-    #    echo "XRT and shell package installation successful."
-    #    flash_card
-    #else
-    #    echo "XRT and/or shell package installation failed."
-    #    exit 1
-    #fi
+    if [ $? == 0 ] ; then
+        echo "XRT and shell package installation successful."
+        flash_card
+    else
+        echo "XRT and/or shell package installation failed."
+        exit 1
+    fi
     
-    #if check_factory_shell ; then
-    #    echo "Shell is in factory reset state. Cold reboot required."   
-    #    $SCRIPT_PATH/cold-boot-init.sh &
-    #elif check_requested_shell ; then
-    #    echo "Shell is already up to date. Cold reboot not required."
-    #    touch ~/boot_flag
-    #else
-    #    echo "FPGA shell could not be verified."
-    #    exit 1
-    #fi
-    #echo "Done running startup script."
-    #exit 0
+    if check_factory_shell ; then
+        echo "Shell is in factory reset state. Cold reboot required."   
+        $SCRIPT_PATH/cold-boot-init.sh &
+    elif check_requested_shell ; then
+        echo "Shell is already up to date. Cold reboot not required."
+        touch ~/boot_flag
+    else
+        echo "FPGA shell could not be verified."
+        exit 1
+    fi
+    echo "Done running startup script."
+    exit 0
 else
     echo "Rebooted the node."
     #This is only supposed to update the SC since the shell is already updated.
